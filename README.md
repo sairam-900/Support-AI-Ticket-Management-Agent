@@ -1,64 +1,383 @@
 # AI Support Desk
 
-An internal IT support tool with six pages: **Dashboard**, **Raise Ticket**, **Open Tickets**,
-**AI Agent**, **About**, and **Settings** — plus sign in / sign up.
+An AI-powered IT Support Ticket Management System that helps users raise, manage, track, and resolve support tickets. The system uses **Google Gemini AI** to automatically analyze newly raised tickets and provide category, priority, summary, and recommended actions.
 
-## Run it
+## Features
+
+* User Sign In and Sign Up
+* Dashboard with live ticket statistics
+* Raise new support tickets
+* AI-powered ticket analysis using Gemini
+* Automatic ticket category detection
+* Automatic priority detection
+* AI-generated ticket summary
+* AI-generated recommended solution
+* Open Tickets management
+* Search and filter tickets
+* Update ticket status
+* Resolve or escalate tickets
+* AI Support Agent
+* User profile and password settings
+* Notification preferences
+* Persistent dark mode
+* SQLite database
+* Responsive web interface
+
+## Main Pages
+
+### 1. Dashboard
+
+Displays real-time information about:
+
+* Total tickets
+* Open tickets
+* In-progress tickets
+* Resolved tickets
+* Recent support tickets
+* Current support queue status
+
+### 2. Raise Ticket
+
+Users can create a new IT support ticket by providing the required issue information.
+
+After submission, Gemini AI analyzes the ticket and generates:
+
+* Category
+* Priority
+* Summary
+* Recommended action
+
+The ticket is then stored in the SQLite database.
+
+### 3. Open Tickets
+
+Displays tickets stored in the database.
+
+Users can:
+
+* Search tickets
+* Filter by department
+* Filter by status
+* View ticket details
+* Mark tickets as In Progress
+* Resolve tickets
+* Escalate tickets
+
+### 4. AI Agent
+
+Provides an AI-powered support interface for assisting users with IT-related issues.
+
+The AI Agent can help users understand problems and provide suitable troubleshooting guidance.
+
+### 5. About
+
+Provides information about the application, its purpose, technologies, and current support queue.
+
+### 6. Settings
+
+Users can manage:
+
+* Display name
+* Password
+* Notification preferences
+* Application theme
+
+## AI Ticket Processing
+
+The main AI workflow is:
+
+```text
+User Raises Ticket
+        ↓
+Ticket Information Submitted
+        ↓
+Gemini AI Analysis
+        ↓
+Category + Priority
+        ↓
+AI Summary
+        ↓
+Recommended Action
+        ↓
+Ticket Stored in SQLite
+        ↓
+Ticket Appears in Open Tickets
+```
+
+## Technology Stack
+
+### Backend
+
+* Python
+* Flask
+* SQLite
+* REST APIs
+
+### Frontend
+
+* HTML
+* CSS
+* JavaScript
+
+### AI
+
+* Google Gemini API
+
+### Database
+
+* SQLite
+
+## Project Structure
+
+```text
+AI-Support-Desk/
+│
+├── main.py
+├── database.db
+├── requirements.txt
+├── .env.example
+├── .gitignore
+│
+├── templates/
+│   ├── base.html
+│   ├── login.html
+│   ├── register.html
+│   ├── dashboard.html
+│   ├── raise_ticket.html
+│   ├── open_tickets.html
+│   ├── ai_agent.html
+│   ├── about.html
+│   └── settings.html
+│
+└── static/
+    ├── css/
+    │   └── style.css
+    │
+    └── js/
+        └── app.js
+```
+
+## API Endpoints
+
+### Authentication
+
+```text
+POST /api/auth/login
+POST /api/auth/register
+```
+
+### Tickets
+
+```text
+GET    /api/tickets
+POST   /api/tickets
+GET    /api/tickets/<id>
+PUT    /api/tickets/<id>
+DELETE /api/tickets/<id>
+```
+
+### Dashboard
+
+```text
+GET /api/dashboard/stats
+```
+
+### Settings
+
+```text
+GET  /api/settings
+PUT  /api/settings/profile
+PUT  /api/settings/password
+```
+
+## Database
+
+The application uses SQLite for storing application data.
+
+The database and required tables are automatically created when the application is started for the first time.
+
+The main ticket information includes:
+
+```text
+Ticket ID
+User
+Title
+Description
+Category
+Priority
+Department
+AI Summary
+AI Recommendation
+Status
+Created Date
+Updated Date
+```
+
+## Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone <your-github-repository-url>
+cd AI-Support-Desk
+```
+
+### 2. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
-cp .env.example .env   # then add your GEMINI_API_KEY
+```
+
+### 3. Create Environment File
+
+Create a `.env` file based on `.env.example`.
+
+```bash
+cp .env.example .env
+```
+
+Add your Gemini API key:
+
+```env
+GEMINI_API_KEY=your_api_key_here
+```
+
+Do not upload your actual API key to GitHub.
+
+### 4. Run the Application
+
+```bash
 python main.py
 ```
 
-Open `http://localhost:5000`. The SQLite database (`database.db`) and tables are created
-automatically on first run.
+### 5. Open the Application
 
-## What changed from the original files
+Open:
 
-**Removed**
-- The marketing landing page (`home.html`) and its fabricated stats, testimonials, and
-  buzzword copy ("cognitive resolution path", "vector parsing sequences", 99.4%/40% stats,
-  a quote from a made-up director). None of that was one of the six real app pages.
-- The unused document-upload API and `documents` table — no page in the app used them.
-- Duplicated per-page HTML for the header/sidebar (~150 lines repeated six times) and the
-  per-page JavaScript that manually highlighted the active sidebar link.
-- Hardcoded/fake data everywhere: the dashboard's static ticket counts and "AI Copilot
-  Efficiency" percentages, Open Tickets' hardcoded rows, and Raise Ticket's `setTimeout`
-  fake AI response.
-- A stray code comment claiming the chat was "forwarded to a local Ollama model" — the
-  actual backend calls Gemini; the comment was simply wrong.
-- The broken `../static/...` relative asset paths (only correct if a page happened to be
-  served one level deep) in favor of Flask's `url_for('static', ...)`.
-
-**Added / wired up for real**
-- A shared `base.html` layout. Every page's sidebar link is now marked active by comparing
-  `request.endpoint` server-side, and a breadcrumb in the header always shows where you are —
-  so navigation is consistent and correct instead of copy-pasted per page.
-- A `tickets` table and full CRUD API (`/api/tickets`, `/api/tickets/<id>`, `/api/dashboard/stats`).
-- Raising a ticket now calls Gemini for a real category/priority/summary/recommendation,
-  stores it, and the resolve/escalate buttons actually update the ticket's status.
-- Open Tickets lists real tickets from the database with working search/department/status
-  filters and a detail view that can mark a ticket In Progress or Resolved.
-- The Dashboard's numbers and "recent tickets" list are now live queries, not fixed text.
-- Settings actually persists a display-name change, a password change, and two notification
-  preferences (`/api/settings`, `/api/settings/profile`, `/api/settings/password`).
-- Login and Register now call the real `/api/auth/*` endpoints with error handling and
-  redirect on success, instead of a `handleFormValidation` stub that did nothing.
-- About page describes the real stack (Flask + SQLite + the Gemini REST API) instead of
-  the original's inaccurate "FastAPI" claim and invented uptime/CPU numbers, and shows a
-  live queue snapshot instead of static figures.
-- Dark mode preference now persists across visits (`localStorage`) instead of resetting.
-
-## Project structure
-
+```text
+http://localhost:5000
 ```
-main.py                  Flask app: pages, auth, tickets, dashboard, settings, chat APIs
-templates/
-  base.html               Shared header/sidebar/breadcrumb layout
-  login.html, register.html
-  dashboard.html, raise_ticket.html, open_tickets.html, ai_agent.html, about.html, settings.html
-static/
-  css/style.css           Small shared utilities (scrollbars, active-nav indicator, focus states)
-  js/app.js                Theme toggle, sidebar toggle, toasts, auth-aware fetch helper
+
+## Environment Variables
+
+```env
+GEMINI_API_KEY=your_gemini_api_key
 ```
+
+The API key should be stored only in the `.env` file.
+
+Make sure `.env` is included in `.gitignore`.
+
+## What Was Improved
+
+The application was developed to replace static and simulated functionality with real backend functionality.
+
+### Removed
+
+* Static dashboard statistics
+* Fake ticket records
+* Fake AI responses
+* Unused document-upload functionality
+* Duplicate page layouts
+* Incorrect AI model comments
+* Hardcoded ticket information
+* Fake AI efficiency statistics
+* Broken relative asset paths
+* Unused `documents` database table
+
+### Added
+
+* Shared `base.html` layout
+* Real SQLite ticket database
+* Ticket CRUD operations
+* Gemini AI ticket analysis
+* Real ticket search and filtering
+* Working ticket status updates
+* Dashboard live statistics
+* Authentication APIs
+* Registration and login functionality
+* Persistent user settings
+* Password update functionality
+* Notification preferences
+* Persistent dark mode
+* AI Support Agent
+* Real-time support queue information
+
+## AI Agent Workflow
+
+```text
+User
+ │
+ ▼
+Raise Support Ticket
+ │
+ ▼
+Flask Backend
+ │
+ ▼
+Gemini API
+ │
+ ├── Category
+ ├── Priority
+ ├── Summary
+ └── Recommendation
+ │
+ ▼
+SQLite Database
+ │
+ ▼
+Dashboard / Open Tickets
+ │
+ ▼
+Support Team
+ │
+ ├── In Progress
+ ├── Resolved
+ └── Escalated
+```
+
+## Security
+
+The project follows basic security practices:
+
+* API keys are stored in environment variables.
+* `.env` should not be committed to GitHub.
+* Authentication is handled through backend APIs.
+* User settings are stored through backend endpoints.
+* Sensitive configuration is separated from source code.
+
+## Future Improvements
+
+The project can be extended with:
+
+* Email notifications
+* Admin dashboard
+* Role-based access control
+* Ticket assignment to support agents
+* Ticket comments and conversation history
+* File attachments
+* Knowledge-base integration
+* AI-powered ticket resolution
+* Automatic ticket escalation
+* Vector database and RAG
+* Advanced analytics
+* Deployment using Render, Railway, or AWS
+* Production-grade authentication and security
+
+## Project Objective
+
+The main objective of this project is to build a practical **AI-powered IT Support Ticket Management Agent** that reduces manual ticket classification and helps support teams manage issues more efficiently.
+
+Instead of manually analyzing every ticket, the AI automatically understands the reported problem, determines its priority and category, summarizes the issue, and recommends an appropriate action.
+
+## Conclusion
+
+**AI Support Desk** combines a traditional IT ticket management system with AI-powered assistance to create a simple and practical support automation platform.
+
+The project demonstrates the integration of:
+
+```text
+Python + Flask + SQLite + JavaScript + REST APIs + Google Gemini AI
+```
+
+into a complete AI-enabled web application.
